@@ -1,7 +1,0 @@
-{
-  "name": "@tdesign/pro-components-chat",
-  "private": true,
-  "main": "index.ts",
-  "author": "tdesign",
-  "license": "MIT"
-}

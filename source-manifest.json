@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "ready",
+  "upstreamRepository": "Tencent/tdesign-react",
+  "baselineSha": "d31df33c40a774d435fd00580f72d99f4d271cf0",
+  "baselineHookSha256": "fcb55f416facc4940f9794ab16180196a3744a54f27cf0b77b3eb82b9c2ae57c",
+  "nodeMajor": 22,
+  "pnpmVersion": "10.33.0",
+  "sourcePackageJsonSha256": "e7afaeddbec5750c0552ca44e27f85e06fc04aafaa46b1f59d98842705db3f70",
+  "hookPath": "packages/components/table/hooks/useRowSelect.tsx",
+  "candidate": {
+    "repository": "dvd233/tdesign-react",
+    "sha": "cf53cf0d947d3d30cf616ebdcb81b305b6fea98b",
+    "patchPath": "candidate.patch",
+    "patchSha256": "590ba972ed0f98977492130488e70073f8e417b651da6a5297c00c143d2248fc",
+    "expectedChangedFiles": {
+      "packages/components/table/hooks/useRowSelect.tsx": "cc0a13ef0fb922740fc5f8e225f5d2f4773c604cfadc85510b61c28a821c3c55",
+      "packages/components/table/__tests__/row-select.test.tsx": "b3e1cabd02430c6c82f4015292b0313f13383e61e6cc2d375cda1d0a46724e96"
+    }
+  },
+  "dependencies": {
+    "lockPath": "locks/pnpm-lock.yaml",
+    "lockSha256": "88264a86728358ff99bb263be5db7cc50ebc6e28e6a96165b9a0c56b0713cc2f",
+    "resolutionNote": "Upstream baseline has no committed pnpm-lock.yaml. One resolved lock must be frozen here, copied unchanged into both source checkouts, and used with --frozen-lockfile."
+  },
+  "browser": {
+    "package": "playwright-core",
+    "version": "1.56.1",
+    "engine": "chromium",
+    "revision": "1194",
+    "browserVersion": "141.0.7390.37"
+  },
+  "harness": {
+    "esbuild": "0.25.12",
+    "sourceImport": "packages/tdesign-react/lib/table/index.js",
+    "cssImport": "packages/tdesign-react/dist/tdesign.css"
+  },
+  "approvedTarget": {
+    "repository": "dvd233/tdesign-react",
+    "repositoryId": "1407033111",
+    "ownerId": "111864431",
+    "ref": "refs/heads/validation/table-page-selection"
+  }
+}

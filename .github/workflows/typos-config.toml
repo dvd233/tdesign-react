@@ -1,7 +1,0 @@
-default.check-filename = true
-
-[default.extend-words]
-actived="actived"
-
-[files]
-extend-exclude = ["CHANGELOG*.md", "*.snap","jest.base.conf.js"]

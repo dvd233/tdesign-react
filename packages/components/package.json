@@ -1,7 +1,0 @@
-{
-  "name": "@tdesign/components",
-  "private": true,
-  "main": "index.ts",
-  "author": "tdesign",
-  "license": "MIT"
-}

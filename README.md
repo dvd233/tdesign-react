@@ -1,105 +1,86 @@
-<p align="center">
-  <a href="https://tdesign.tencent.com/" target="_blank">
-    <img alt="TDesign Logo" width="200" src="https://tdesign.gtimg.com/site/TDesign.png" />
-  </a>
-</p>
+# Source-bound TDesign Table browser validation
 
-<p align="center">
-   <a href="https://www.npmjs.com/package/tdesign-react">
-    <img src="https://img.shields.io/npm/l/tdesign-react.svg?sanitize=true" alt="License" />
-  </a>
-  <a href="https://app.codecov.io/gh/Tencent/tdesign-react">
-    <img src="https://img.shields.io/codecov/c/github/Tencent/tdesign-react/develop.svg?style=flat-square" alt="codecov">
-  </a>
-  <a href="https://www.npmjs.com/package/tdesign-react">
-    <img src="https://img.shields.io/npm/v/tdesign-react.svg?sanitize=true" alt="Version">
-  </a>
-  <a href="https://www.npmjs.com/package/tdesign-react">
-    <img src="https://img.shields.io/npm/dm/tdesign-react.svg?sanitize=true" alt="Downloads" />
-  </a>
-  <a href="https://deepwiki.com/Tencent/tdesign-react">
-    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki">
-  </a>
-</p>
+## Current status
 
-English | [简体中文](./README-zh_CN.md)
+This validation package has frozen source inputs and local build-only checks. Its static/synthetic checks and real esbuild regression are verified separately; none is browser evidence. Actual browser results must be read from a specific hosted run and its evidence, not inferred from this document. The candidate's separate native build, lint, unit and snapshot suites also pass; none of those results is browser evidence. The original executor's Chromium launch was denied (`socket: Operation not permitted`), so this package never retries a local browser, another browser, port workaround or disabled sandbox. Screenshots and baseline/fixed browser results require the separate authorized GitHub Actions run.
 
-TDesign React is a UI component library for React 16.x and desktop application.
+The baseline is Tencent/tdesign-react develop commit `d31df33c40a774d435fd00580f72d99f4d271cf0`. The published source-only candidate is `cf53cf0d947d3d30cf616ebdcb81b305b6fea98b`, with tree `78e2b9627f75910592106ec7280c02ed4b2aa422`, on `dvd233/tdesign-react:fix/table-current-page-selection`. The approved fork identity is repository ID `1407033111`, owner ID `111864431`. `source-manifest.json` is now ready and binds that exact candidate commit, the two product-file hashes, `candidate.patch` and `locks/pnpm-lock.yaml`. Ready means the inputs are frozen, not that browser validation has passed. No floating branch or npm TDesign package is accepted as the fixed source.
 
-# 🎉 Features
+## Separation from product PR
 
-- Desktop application interaction
-- High quality UI components for React
-- Consistent API and UI with TDesign component libraries for other frameworks
-- Dark mode and customizable theme
-- Support tree-shaking
+Keep this entire package on its own `validation/table-page-selection` branch in `dvd233/tdesign-react`, with these files at the branch root. Its sole workflow sits at `.github/workflows/validate-table-page-selection.yml`. Build its publication tree from an empty index containing exactly the 32 inventoried validation files; do not layer those files onto the product/candidate tree. A validation commit may use the verified source commit as its parent, but its tree must remain the independent validation-only tree. No other inherited product workflow belongs on this branch. Do not copy the workflow, harness, source lock, screenshots or runner into the product branch/PR. The product PR contains only the approved hook change and repository-native tests.
 
-# 📦 Installation
+No publication is performed by the preparation scripts. The source-only product commit is already published; creating/pushing the separate validation branch remains a distinct authorized publication step. A later authorized push to the exact validation branch triggers CI. `workflow_dispatch` is also present, but GitHub may require the workflow to be registered on the default branch before a manual dispatch; use the branch-push trigger rather than adding validation files to the product/default branch just to enable it.
 
-```shell
-npm i tdesign-react
-```
+The workflow uses only public Git source and package registries. It grants `contents: read`, disables persisted checkout credentials, clones source without an authentication token, has no third-party service credentials, no publish/PR/comment/deploy step, and uploads evidence only as GitHub Actions artifacts. Both the workflow job condition and pre-install runtime guard require the exact approved repository name, repository ID, owner ID, `refs/heads/validation/table-page-selection`, and a `push` or `workflow_dispatch` event. The candidate repository must equal that approved fork. Other forks, renamed/lookalike validation branches and other dispatch targets fail closed. Chromium uses its sandbox on the hosted Ubuntu 22.04 runner; a sandbox/runtime failure is a hard validation failure, never grounds to weaken security settings.
 
-```shell
-yarn add tdesign-react
-```
+## Frozen inputs
 
-```shell
-pnpm add tdesign-react
-```
+Read `source-manifest.json` for all exact versions/hashes. Current source declares `.node-version=22` and `packageManager=pnpm@10.33.0`; older Node 18/pnpm 9 prose is not used. This workflow pins Node `22.23.3`, pnpm `10.33.0`, esbuild `0.25.12`, Playwright Core `1.56.1`, Chromium revision `1194` / `141.0.7390.37`. Official Actions are pinned to full verified commit SHAs; `actions-lock.json` records the official repository, tag, peeled commit and read-only `git ls-remote` source checked on 2026-10-06.
 
-# 🔨 Usage
+The upstream baseline has no committed `pnpm-lock.yaml`. The single resolved source lock is now frozen in `locks/pnpm-lock.yaml` (559338 bytes; SHA-256 `88264a86728358ff99bb263be5db7cc50ebc6e28e6a96165b9a0c56b0713cc2f`). Install both source checkouts with these same bytes using `--frozen-lockfile --ignore-scripts`. Preserve that lock as evidence; it is not part of the product PR. The harness has its own exact `package-lock.json` and no dependency on npm `tdesign-react`, React or ReactDOM: it resolves React from the checked-out source's installed dependency tree.
 
-```tsx
-import React from 'react';
-import { Button } from 'tdesign-react';
-import 'tdesign-react/es/style/index.css';
+The approved changed-file map contains only the hook and its new regression test. The preparation command used to bind the reviewed inputs is:
 
-function App() {
-  return <Button>Hello TDesign</Button>;
-}
+    node scripts/freeze-inputs.mjs --patch /absolute/frozen/candidate.patch --lock /absolute/frozen/pnpm-lock.yaml --changed-files /absolute/frozen/product-file-hashes.json --repository dvd233/tdesign-react --sha cf53cf0d947d3d30cf616ebdcb81b305b6fea98b
 
-ReactDOM.createRoot(document.getElementById('app')).render(<App />);
-```
+The script copies only into this validation package and records hashes. It performs no install, Git write or publication. Partial freezing is allowed for preparation; `status` stays draft until all inputs exist. CI refuses a draft. After freezing, review the manifest and ensure its candidate source SHA is the actual published product commit, never a validation commit, merge ref or local guess.
 
-The package of tdesign-react provides kinds of bundles, read [the documentation](https://github.com/Tencent/tdesign/blob/main/docs/develop-install.md) for the detail of differences between bundles.
+## Build/source chain
 
-# Quick Start
+1. Check out the validation branch with persisted credentials disabled.
+2. Fetch baseline and fixed source separately at full immutable SHAs; initialize their exact recursive submodule gitlinks.
+3. Check Node/pnpm declarations, clean tracked source/submodules, baseline hook hash, fixed changed-path set and each approved file hash, candidate patch hash and the shared dependency lock. Apply the frozen patch to the baseline in a separate temporary Git index, write its tree and require exact equality to the real candidate commit tree; record baseline, candidate and reconstructed tree IDs. The real source worktree and index remain untouched.
+4. Install source dependencies with `--frozen-lockfile --ignore-scripts`, then repeat the source gate before running any native build. Gitlink-pinned submodules are initialized explicitly beforehand; the source preinstall returns immediately in CI and its prepare only installs Git hooks, so neither is required to compile the product. Skipping lifecycle scripts avoids Husky 7 generating an ignored `.husky/_` directory and leaves the strict source-input gate unchanged. The separate harness `npm ci` still runs its own locked esbuild installation scripts. Scan untracked files and directories without `--exclude-standard`, so ignored source/config files are also rejected, including each recursive submodule. The only untracked allowances are dependency directories at committed package roots, the separately hash-checked root lock, and the five explicit `packages/tdesign-react/{es,esm,lib,cjs,dist}` output directories. A same-name `.js` override or extra/ignored `.tsx` is rejected. Run the repository's native `pnpm run build` independently for both checkouts. No npm TDesign substitute, checked-in prebuilt bundle or hand-reimplemented selection logic is used.
+5. Bundle the identical harness against the build's `packages/tdesign-react/lib/table/index.js` and generated full component stylesheet `dist/tdesign.css`. Resolve React/ReactDOM from that checkout.
+6. Resolve every real esbuild metafile input to its canonical filesystem path. Only the exact trusted object-define pseudo-input `<define:__VALIDATION_PROVENANCE__>` is exempt from realpath; unknown pseudo-inputs and missing real files fail. Verify the final browser bundle's chained sourcemap embeds `useRowSelect.tsx` with exactly the frozen source hash. Reject an npm TDesign input; record esbuild input graph, JS/CSS/map hashes and resolved React versions.
+7. Compare source bindings before install, after install/before build, after build and after browser execution. Compare harness/spec/runner/lock/browser/submodule identities between baseline and fixed.
 
-Visit [TDesign Starter](https://tdesign.tencent.com/starter/react/) to experience in the application built with TDesign React UI components.
+A build failure, missing source map, dirty source, missing submodule, dependency lock mismatch or unexpected candidate file fails CI. It is not a product-regression red.
 
-# Browser Support
+## Same real browser specification, precise red and green
 
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/> IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)<br/>Safari |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Edge >=84                                                                                                                                                                                                        | Firefox >=83                                                                                                                                                                                                      | Chrome >=84                                                                                                                                                                                                   | Safari >=14.1                                                                                                                                                                                                 |
+Both variants run `scripts/spec.mjs` through `scripts/browser-regression.mjs` without variant-specific selectors or interactions. The real Table receives six synthetic rows (`id=1..6`), two rows per page, controlled selected keys and normal `defaultCurrent/defaultPageSize` pagination. Browser actions click the actual header checkbox label and the actual Table pagination buttons.
 
-Read our [browser compatibility](https://github.com/Tencent/tdesign/wiki/Browser-Compatibility) for more details.
+Four scenarios: `reserveSelectedRowOnPaginate=false/true`, each starting independently on page 1 and page 2. Every scenario checks:
 
-# TDesign component libraries
+- Page readiness, runtime source identity, rendered row IDs, selected state, initial header and row checkbox states.
+- Header select, unselect, repeat select.
+- Navigate to the other page while selected. False must emit `CLEAR_ON_PAGINATE` and clear; true must preserve all six keys with no selection event.
+- Select/unselect/reselect the other page, navigate back, select/unselect again.
+- Exact callback count, callback origin/type, `keys`, complete `selectedRowData` objects and IDs, controlled selected state, visible row identity and checkbox states at every checkpoint.
 
-TDesign also provides component libraries for other platforms and frameworks.
+The unmodified baseline runner must exit **1** with exactly **20** contract differences: ten false-mode select actions, each differing in `keys` and `selectedRowDataIds`. Every such actual payload must be exactly `[1,2,3,4,5,6]` and matching six row objects; the expected payload is precisely the two displayed page IDs. False-mode clears/navigation and every true-mode checkpoint must pass. Baseline exit 0 is rejected because reproduction was not established.
 
-- component library for Vue 3.x : [tdesign-vue-next](https://github.com/Tencent/tdesign-vue-next)
-- component library for Vue 2.x : [tdesign-vue](https://github.com/Tencent/tdesign-vue)
-- component library for Wechat miniprogram : [tdesign-miniprogram](https://github.com/Tencent/tdesign-miniprogram)
+Fixed must exit **0**, with the same spec passing every checkpoint. A browser/load/selector/runtime/network/cleanup error gives exit **2**, an incomplete report or an error entry, all rejected. Missing scenarios/checkpoints, arbitrary baseline assertion failures, other six-key values, unrelated behavior changes or changed specs are rejected. `tests/classifier.test.mjs` explicitly tests these rejection paths with clearly synthetic data; those unit tests are not browser evidence.
 
-# Contributing
+The original 13 classifier cases and the independent audit's 854 corrupted-report counterexamples are retained. Added synthetic tests cover execution-scope mismatches, non-patches and wrong patch trees, extra/ignored/same-name source inputs and submodule inputs, plus missing ready-image/trace evidence. These use isolated synthetic Git fixtures only; they do not constitute native product builds or browser evidence.
 
-Contributing is welcome. Read [guidelines for contributing](https://github.com/Tencent/tdesign-react/blob/develop/CONTRIBUTING.md) before submitting your [Pull Request](https://github.com/Tencent/tdesign-react/pulls).
+The classifier checks structured values rather than treating any nonzero baseline process as expected red. The workflow also compares the real runner exit code to the report's code. It deliberately does not use blanket `continue-on-error`.
 
-## Contributors
+## Evidence and reading the result
 
-<a href="https://openomy.app/github/tencent/tdesign-react" target="_blank" style="display: block; width: 100%;" align="center">
-  <img src="https://openomy.app/svg?repo=tencent/tdesign-react&chart=bubble&latestMonth=12" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
- </a>
+GitHub Actions uploads an artifact named `table-page-selection-RUN_ID-RUN_ATTEMPT`, even on failure. It includes:
 
-# Feedback
+- `evidence/VERDICT.json` only when exact baseline red + fixed green and source checks all succeed.
+- `baseline/results.json`, `fixed/results.json`: complete preconditions and every callback, expected value and mismatch.
+- Labelled before/after PNG screenshots for ready state and every action, showing the source commit and actual callback payload. Ready-state and checkpoint images have verified hashes.
+- Per-scenario Playwright trace ZIPs with screenshots, DOM snapshots and source, each required and hash-checked by the final verifier; interrupted trace when possible.
+- Native install/build logs, dependency locks, before/after source records, harness provenance, bundle/map and esbuild input graph.
 
-Create your [Github issues](https://github.com/Tencent/tdesign-react/issues) or scan the QR code below to join our user groups
+Screenshots alone are not a pass. A successful job plus `VERDICT.json`, exact immutable source IDs, both structured reports and expected PNGs constitute the evidence. If the hosted runner cannot build or launch Chromium, report that blocker and retain logs; do not call it baseline reproduction or fixed verification.
 
-<img src="https://raw.githubusercontent.com/Tencent/tdesign/main/packages/site-components/src/images/groups/react-group.png" width="200" />
+## Allowed local checks
 
-# License
+    node scripts/check-syntax.mjs
+    node --test tests/*.test.mjs
 
-The MIT License. Please see [the license file](./LICENSE) for more information.
+The runner has a CI-only guard before any server/browser startup. Do not set `GITHUB_ACTIONS=true` to bypass it locally. Do not run a local Playwright install/launch to work around the prior denial. `npm run build:harness` is build-only but requires the real source library to have been built first; a syntax transform is not a source-bound build.
+
+## Scope
+
+This browser artifact targets the ordinary Table current-page select-all defect, default pagination and the required true-mode control. It is not a claim that all repository unit/snapshot/lint checks pass, and it does not claim browser coverage of tree/disabled/remote pagination. Those unchanged boundaries belong in the separate repository-native regression suite. No historical issue is automatically closed or claimed by this package.
+
+Reference source policies read: root AGENTS.md, `.codebuddy/skills/tdesign-test-component/SKILL.md`, actual root/package manifests, `.node-version`, `.gitmodules`, native Rollup config, and `.github/workflows/pull-request.yml` / `preview-build.yml` at the baseline SHA.
+
+The full native stylesheet is intentional: the native `es/style/index.css` contains only global styles and no Table rules. The selected `dist/tdesign.css` includes Table, Checkbox and Pagination styling for real interaction screenshots. This was verified from the completed native build without launching a browser.
